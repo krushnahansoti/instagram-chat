@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Instagram Chat Viewer</title>
+
+<style>
+
+/* ---------- THEMES ---------- */
+
+:root{
+--bg:#fafafa;
+--chatbg:white;
+--received:#efefef;
+--sent-gradient:linear-gradient(45deg,#3797F0,#5851DB);
+--text:black;
+--time:#8e8e8e;
+}
+
+.dark{
+--bg:#000;
+--chatbg:#121212;
+--received:#262626;
+--sent-gradient:linear-gradient(45deg,#3797F0,#5851DB);
+--text:#e4e6eb;
+--time:#a8a8a8;
+}
+
+.love{
+--bg:#1a0f14;
+--chatbg:#2b1a20;
+--received:#3a252c;
+--sent-gradient:linear-gradient(45deg,#ff3e6c,#ff6a88,#ff99ac);
+--text:#ffe6eb;
+--time:#ffb3c1;
+}
+
+/* ---------- PAGE ---------- */
+
+body{
+background:var(--bg);
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial;
+margin:0;
+display:flex;
+flex-direction:column;
+align-items:center;
+}
+
+/* ---------- TOP BAR ---------- */
+
+.topbar{
+width:100%;
+max-width:700px;
+display:flex;
+gap:10px;
+justify-content:center;
+padding:15px;
+flex-wrap:wrap;
+}
+
+/* ---------- CHAT ---------- */
+
+.chat{
+width:100%;
+max-width:700px;
+background:var(--chatbg);
+padding:20px;
+display:flex;
+flex-direction:column;
+}
+
+/* ---------- MESSAGE ---------- */
+
+.message{
+max-width:65%;
+padding:10px 14px;
+margin:6px 0;
+font-size:14px;
+word-wrap:break-word;
+color:var(--text);
+}
+
+.sent{
+align-self:flex-end;
+background:var(--sent-gradient);
+color:white;
+border-radius:18px 18px 4px 18px;
+}
+
+.received{
+align-self:flex-start;
+background:var(--received);
+border-radius:18px 18px 18px 4px;
+}
+
+.time{
+font-size:11px;
+color:var(--time);
+margin-top:3px;
+}
+
+/* ---------- IMAGE ---------- */
+
+.message img{
+max-width:250px;
+border-radius:12px;
+margin-top:5px;
+}
+
+/* ---------- BUTTONS ---------- */
+
+button{
+padding:6px 12px;
+cursor:pointer;
+border:none;
+border-radius:6px;
+background:#ddd;
+}
+
+button:hover{
+opacity:0.8;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="topbar">
+
+<input type="file" id="fileInput">
+
+<button onclick="setTheme('light')">Light</button>
+<button onclick="setTheme('dark')">Dark</button>
+<button onclick="setTheme('love')">Love</button>
+
+</div>
+
+<div class="chat" id="chat"></div>
+
+<script>
+
+/* ---------- CHANGE THIS ---------- */
+/* Your Instagram username */
+const myName = "Groot";
+
+/* ---------- THEME SWITCH ---------- */
+
+function setTheme(theme){
+
+document.body.classList.remove("dark","love");
+
+if(theme==="dark"){
+document.body.classList.add("dark");
+}
+
+if(theme==="love"){
+document.body.classList.add("love");
+}
+
+}
+
+/* ---------- LOAD CHAT FILE ---------- */
+
+document.getElementById("fileInput").addEventListener("change",function(e){
+
+const file = e.target.files[0];
+
+const reader = new FileReader();
+
+reader.onload = function(event){
+
+const parser = new DOMParser();
+
+const doc = parser.parseFromString(event.target.result,"text/html");
+
+/* Instagram export messages */
+
+const blocks = [...doc.querySelectorAll("div.pam")].reverse();
+
+const chat = document.getElementById("chat");
+
+chat.innerHTML="";
+
+/* ---------- PARSE MESSAGES ---------- */
+
+blocks.forEach(block=>{
+
+const sender = block.querySelector("h2._a6-h")?.innerText;
+
+const messageDiv = block.querySelector("div._a6-p");
+
+const time = block.querySelector("div._a6-o")?.innerText;
+
+if(!messageDiv) return;
+
+/* message text */
+
+let text = messageDiv.innerText.trim();
+
+/* images */
+
+const img = messageDiv.querySelector("img");
+
+const bubble = document.createElement("div");
+
+bubble.classList.add("message");
+
+if(sender === myName){
+bubble.classList.add("sent");
+}else{
+bubble.classList.add("received");
+}
+
+let content = "";
+
+/* if image exists */
+
+if(img){
+
+content += `<img src="${img.getAttribute("src")}">`;
+
+}
+
+/* add text */
+
+if(text){
+content += `<div>${text}</div>`;
+}
+
+content += `<div class="time">${time}</div>`;
+
+bubble.innerHTML = content;
+
+chat.appendChild(bubble);
+
+});
+
+};
+
+reader.readAsText(file);
+
+});
+
+</script>
+
+</body>
+</html>
