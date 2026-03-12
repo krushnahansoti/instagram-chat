@@ -2,7 +2,10 @@
 <html>
 <head>
 <meta charset="UTF-8">
+
 <title>Instagram Chat Viewer</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
 
@@ -13,7 +16,7 @@
 --chatbg:white;
 --received:#efefef;
 --sent-gradient:linear-gradient(45deg,#3797F0,#5851DB);
---text:black;
+--text:#000;
 --time:#8e8e8e;
 }
 
@@ -44,6 +47,7 @@ margin:0;
 display:flex;
 flex-direction:column;
 align-items:center;
+min-height:100vh;
 }
 
 /* ---------- TOP BAR ---------- */
@@ -52,10 +56,23 @@ align-items:center;
 width:100%;
 max-width:700px;
 display:flex;
+flex-wrap:wrap;
 gap:10px;
 justify-content:center;
 padding:15px;
-flex-wrap:wrap;
+}
+
+button{
+padding:8px 14px;
+border:none;
+border-radius:6px;
+background:#ddd;
+cursor:pointer;
+font-size:14px;
+}
+
+button:hover{
+opacity:0.8;
 }
 
 /* ---------- CHAT ---------- */
@@ -64,7 +81,7 @@ flex-wrap:wrap;
 width:100%;
 max-width:700px;
 background:var(--chatbg);
-padding:20px;
+padding:18px;
 display:flex;
 flex-direction:column;
 }
@@ -72,10 +89,11 @@ flex-direction:column;
 /* ---------- MESSAGE ---------- */
 
 .message{
-max-width:65%;
+max-width:75%;
 padding:10px 14px;
 margin:6px 0;
-font-size:14px;
+font-size:15px;
+line-height:1.4;
 word-wrap:break-word;
 color:var(--text);
 }
@@ -93,32 +111,40 @@ background:var(--received);
 border-radius:18px 18px 18px 4px;
 }
 
+/* ---------- TIME ---------- */
+
 .time{
 font-size:11px;
 color:var(--time);
-margin-top:3px;
+margin-top:4px;
 }
 
 /* ---------- IMAGE ---------- */
 
 .message img{
-max-width:250px;
+max-width:100%;
 border-radius:12px;
-margin-top:5px;
+margin-top:6px;
 }
 
-/* ---------- BUTTONS ---------- */
+/* ---------- MOBILE ---------- */
 
-button{
-padding:6px 12px;
-cursor:pointer;
-border:none;
-border-radius:6px;
-background:#ddd;
+@media (max-width:600px){
+
+.chat{
+padding:12px;
 }
 
-button:hover{
-opacity:0.8;
+.message{
+font-size:16px;
+max-width:80%;
+}
+
+.topbar{
+flex-direction:column;
+align-items:center;
+}
+
 }
 
 </style>
@@ -140,9 +166,10 @@ opacity:0.8;
 
 <script>
 
-/* ---------- CHANGE THIS ---------- */
-/* Your Instagram username */
+/* CHANGE THIS TO YOUR INSTAGRAM USERNAME */
+
 const myName = "Groot";
+
 
 /* ---------- THEME SWITCH ---------- */
 
@@ -160,6 +187,7 @@ document.body.classList.add("love");
 
 }
 
+
 /* ---------- LOAD CHAT FILE ---------- */
 
 document.getElementById("fileInput").addEventListener("change",function(e){
@@ -174,7 +202,7 @@ const parser = new DOMParser();
 
 const doc = parser.parseFromString(event.target.result,"text/html");
 
-/* Instagram export messages */
+/* Instagram messages */
 
 const blocks = [...doc.querySelectorAll("div.pam")].reverse();
 
@@ -182,7 +210,6 @@ const chat = document.getElementById("chat");
 
 chat.innerHTML="";
 
-/* ---------- PARSE MESSAGES ---------- */
 
 blocks.forEach(block=>{
 
@@ -194,17 +221,20 @@ const time = block.querySelector("div._a6-o")?.innerText;
 
 if(!messageDiv) return;
 
-/* message text */
+
+/* text */
 
 let text = messageDiv.innerText.trim();
 
-/* images */
+/* image */
 
 const img = messageDiv.querySelector("img");
+
 
 const bubble = document.createElement("div");
 
 bubble.classList.add("message");
+
 
 if(sender === myName){
 bubble.classList.add("sent");
@@ -212,29 +242,39 @@ bubble.classList.add("sent");
 bubble.classList.add("received");
 }
 
+
 let content = "";
 
-/* if image exists */
+
+/* render image */
 
 if(img){
-
 content += `<img src="${img.getAttribute("src")}">`;
-
 }
 
-/* add text */
+
+/* render text */
 
 if(text){
 content += `<div>${text}</div>`;
 }
 
+
+/* render time */
+
 content += `<div class="time">${time}</div>`;
+
 
 bubble.innerHTML = content;
 
 chat.appendChild(bubble);
 
 });
+
+
+/* scroll to bottom */
+
+window.scrollTo(0,document.body.scrollHeight);
 
 };
 
